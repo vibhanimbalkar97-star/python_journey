@@ -477,6 +477,3 @@ I'd prioritize these:
 19. How do you find unique values?
 20. How do you handle missing values (`NaN`)?
 
-### For your level
-
-Don't go too deep into NumPy internals right now. **Master these topics with coding practice first.** After that, move to **Pandas**, because Pandas is more directly useful for data analysis and will build naturally on your NumPy knowledge.
