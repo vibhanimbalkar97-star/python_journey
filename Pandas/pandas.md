@@ -267,3 +267,33 @@ For your **NumPy → Pandas → ML/AI** path, learn Pandas in this order:
 > **Pandas is a Python library used for data manipulation, cleaning, analysis, and preparation of structured/tabular data, mainly using Series and DataFrame.**
 
 
+read_csv()
+head()
+tail()
+shape
+columns
+info()
+describe()
+
+loc[]
+iloc[]
+
+isnull()
+dropna()
+fillna()
+drop_duplicates()
+
+sort_values()
+groupby()
+
+value_counts()
+unique()
+nunique()
+
+apply()
+map()
+
+merge()
+concat()
+
+to_csv()

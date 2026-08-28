@@ -477,3 +477,15 @@ I'd prioritize these:
 19. How do you find unique values?
 20. How do you handle missing values (`NaN`)?
 
+| Topic                   | Practice                            |
+| ----------------------- | ----------------------------------- |
+| Array creation          | `array()`, `arange()`, `linspace()` |
+| Shape                   | `shape`, `ndim`, `size`             |
+| Indexing                | `arr[0]`, `arr[1:4]`                |
+| Reshaping               | `reshape()`                         |
+| Mathematical operations | `+`, `-`, `*`, `/`                  |
+| Aggregation             | `sum()`, `mean()`, `min()`, `max()` |
+| Boolean filtering       | `arr[arr > 10]`                     |
+| Sorting                 | `sort()`                            |
+| Broadcasting            | Different-shaped arrays             |
+| Copy                    | Shallow/deep copy concepts          |
