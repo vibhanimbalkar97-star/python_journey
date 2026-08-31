@@ -127,3 +127,115 @@ df[condition]
 ```
 
 Yahi Pandas mein **filtering** ka core concept hai.
+============================================================================================================================
+
+Both are used to **select/filter rows**, but they work differently.
+
+Suppose:
+
+```python
+df
+```
+
+| index | Name | Age |
+| ----: | ---- | --: |
+|     0 | A    |  18 |
+|     1 | B    |  22 |
+|     2 | C    |  25 |
+|     3 | D    |  19 |
+|     4 | E    |  30 |
+|     5 | F    |  24 |
+
+---
+
+### 1. `df.iloc[0:5]`
+
+`iloc` = **integer position**
+
+```python
+df.iloc[0:5]
+```
+
+Means:
+
+> Give me rows from **position 0 up to 5 (5 excluded)**.
+
+So you get:
+
+| index | Name | Age |
+| ----: | ---- | --: |
+|     0 | A    |  18 |
+|     1 | B    |  22 |
+|     2 | C    |  25 |
+|     3 | D    |  19 |
+|     4 | E    |  30 |
+
+🧠 Same slicing concept as Python lists:
+
+```python
+arr[0:5]
+```
+
+---
+
+### 2. `df.loc[df["Age"] > 20]`
+
+Here `loc` is being used with a **condition**.
+
+First:
+
+```python
+df["Age"] > 20
+```
+
+creates:
+
+```text
+0    False
+1    True
+2    True
+3    False
+4    True
+5    True
+```
+
+Then:
+
+```python
+df.loc[df["Age"] > 20]
+```
+
+means:
+
+> Give me rows where `Age` is greater than 20.
+
+Result:
+
+| index | Name | Age |
+| ----: | ---- | --: |
+|     1 | B    |  22 |
+|     2 | C    |  25 |
+|     4 | E    |  30 |
+|     5 | F    |  24 |
+
+---
+
+### 🧠 Main difference
+
+| Code                     | Meaning            | Selection based on  |
+| ------------------------ | ------------------ | ------------------- |
+| `df.iloc[0:5]`           | First 5 rows       | **Position**        |
+| `df.loc[df["Age"] > 20]` | Age > 20 rows      | **Condition/label** |
+| `df.iloc[2]`             | 3rd row            | Position            |
+| `df.loc[2]`              | Row with index `2` | Index label         |
+
+### Easy way to remember
+
+```text
+iloc → integer POSITION
+loc  → LABEL / CONDITION
+```
+
+For example, if you want **rows 0–4** → `iloc`.
+
+If you want **people whose Age > 20** → `loc`.

@@ -286,4 +286,60 @@ df.groupby("Category")["Total"].sum()
 df.to_csv("cleaned_data.csv", index=False)
 ```
 
+==================================================
+⭐ Your universal checklist
 
+Whenever you receive a new CSV, remember:
+1. LOAD
+   ↓
+2. UNDERSTAND
+   head, shape, info, describe
+   ↓
+3. CHECK
+   missing values
+   duplicates
+   data types
+   unique values
+   invalid values
+   ↓
+4. CLEAN
+   missing
+   duplicates
+   types
+   text
+   invalid values
+   ↓
+5. TRANSFORM
+   new columns
+   dates
+   filtering
+   sorting
+   grouping
+   ↓
+6. ANALYZE
+   statistics
+   groupby
+   comparisons
+   ↓
+7. VALIDATE
+   check everything again
+   ↓
+8. SAVE / ML
+
+One important point
+
+Don't apply every cleaning operation to every dataset.
+
+For example, if:
+
+df.isnull().sum()
+
+returns all 0, you don't need to fill missing values.
+
+If there are no duplicates, you don't need to remove duplicates.
+
+So the real mindset is:
+
+Inspect first → identify problems → fix only those problems → validate.
+
+That's the workflow you should practice on your countries dataset and then repeat with sales, Titanic, employee, customer, and other datasets.
