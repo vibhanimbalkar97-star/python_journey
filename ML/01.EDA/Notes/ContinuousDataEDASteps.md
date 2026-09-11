@@ -530,3 +530,26 @@ For regression, target scaling **kabhi-kabhi** ki ja sakti hai, especially when 
 **Remember:**
 
 > **Scaling → numerical features (`X`) → only when the algorithm is sensitive to feature magnitude.**
+
+
+Yes, **roughly**, but with an important clarification.
+
+For a **standard normal distribution**, after standardization using `StandardScaler`:
+
+* Mean = **0**
+* Standard deviation = **1**
+* Most values fall between **-3 and +3**
+
+The **-3 to +3 is not the complete range**. Values can be below -3 or above +3, but they are rare.
+
+| Range    | Approx. data |
+| -------- | -----------: |
+| -1 to +1 |          68% |
+| -2 to +2 |          95% |
+| -3 to +3 |        99.7% |
+
+So remember:
+
+> **StandardScaler → mean = 0, SD = 1; approximately 99.7% of normally distributed data lies between -3 and +3.**
+
+This is also why **z-score values around ±3** are sometimes used as an indication of potential outliers.
