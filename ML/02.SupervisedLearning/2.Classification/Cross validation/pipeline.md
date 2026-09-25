@@ -552,3 +552,189 @@ Pipeline ✅
 ```
 
 That's exactly the concept you should remember for interviews.
+=============================================================================================================================================
+
+Yes — this is a very important concept. Let's understand **why `X_train` and `y_train` are passed to `cross_val_score()`**.
+
+Suppose you already did:
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+```
+
+You now have:
+
+```text
+X_train → training features
+y_train → training target
+
+X_test  → final test features
+y_test  → final test target
+```
+
+---
+
+## Why `X_train, y_train` in CV?
+
+When you write:
+
+```python
+scores = cross_val_score(
+    pipeline,
+    X_train,
+    y_train,
+    cv=5,
+    scoring="accuracy"
+)
+```
+
+you're telling Python:
+
+> **"Use my training data and divide it into 5 folds for cross-validation."**
+
+So `cross_val_score()` internally does something like:
+
+```text
+X_train + y_train
+       ↓
+   Divide into 5 folds
+       ↓
+ ┌─────┬─────┬─────┬─────┬─────┐
+ F1    F2    F3    F4    F5
+```
+
+### Fold 1
+
+```text
+Training → F2 + F3 + F4 + F5
+Validation → F1
+```
+
+### Fold 2
+
+```text
+Training → F1 + F3 + F4 + F5
+Validation → F2
+```
+
+And so on.
+
+---
+
+## Why NOT `X_test, y_test`?
+
+Because your test data should be kept **untouched** until the end.
+
+Think:
+
+```text
+              Complete Dataset
+                    ↓
+             train_test_split
+              ↙            ↘
+         Training          Test
+            ↓                ↓
+     Cross Validation    Keep untouched
+            ↓                ↓
+      Model selection       Final
+      / tuning            evaluation
+```
+
+So:
+
+```python
+cross_val_score(pipeline, X_train, y_train, cv=5)
+```
+
+✅ Correct.
+
+Then after CV/model tuning:
+
+```python
+pipeline.fit(X_train, y_train)
+
+y_pred = pipeline.predict(X_test)
+```
+
+and finally:
+
+```python
+accuracy_score(y_test, y_pred)
+```
+
+---
+
+## Why are they called `X` and `y`?
+
+This is standard ML notation:
+
+### `X` = Features / input
+
+For your SVM example, suppose you're predicting whether a patient has heart disease:
+
+```text
+X
+├── age
+├── cholesterol
+├── blood_pressure
+├── max_heart_rate
+└── etc.
+```
+
+### `y` = Target / output
+
+```text
+y
+└── heart_disease
+```
+
+So:
+
+```python
+X_train
+```
+
+means:
+
+> Training input/features
+
+and:
+
+```python
+y_train
+```
+
+means:
+
+> Training target/output.
+
+---
+
+### Easy way to remember
+
+```text
+X = Questions / Input
+y = Answer / Target
+```
+
+And:
+
+```text
+X_train + y_train
+        ↓
+Cross Validation
+        ↓
+Train + Validation
+```
+
+while:
+
+```text
+X_test + y_test
+        ↓
+Final evaluation only
+```
+
+So in your code, **`scores` doesn't contain X or y**. `scores` contains the **accuracy produced after CV runs on `X_train` and `y_train`**.
