@@ -566,3 +566,194 @@ Usually you choose based on the size of the search space.
 And the interview answer:
 
 > **“RandomizedSearchCV is a hyperparameter tuning technique that randomly samples a specified number of hyperparameter combinations and evaluates them using cross-validation. It is useful when the hyperparameter search space is large because it can find good parameter combinations with fewer model evaluations than exhaustive GridSearchCV.”**
+==================================================================================================================
+
+| Parameter             | Meaning                               |
+| --------------------- | ------------------------------------- |
+| `estimator`           | Which model to tune                   |
+| `param_distributions` | Hyperparameters and possible values   |
+| `n_iter`              | Number of random combinations to try  |
+| `cv`                  | Number of cross-validation folds      |
+| `scoring`             | Metric used to compare models         |
+| `random_state`        | Makes random selection reproducible   |
+| `n_jobs`              | Number of parallel jobs/CPU resources |
+
+Estimator specifies the ML model that RandomizedSearchCV will tune, while n_jobs specifies how many jobs can run in parallel. n_jobs=-1 uses all available CPU cores to speed up the search.
+
+==========================================================================================================================================
+
+Yes — these two parameters are easy once you separate their roles.
+
+## 1. `estimator` — **which ML model to tune?**
+
+In:
+
+```python
+RandomizedSearchCV(
+    estimator=model,
+    param_distributions=param_distributions,
+    n_iter=10,
+    cv=5
+)
+```
+
+`estimator` means:
+
+> **The ML algorithm/model on which RandomizedSearchCV will try different hyperparameters.**
+
+For example:
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier()
+
+random_search = RandomizedSearchCV(
+    estimator=model,
+    param_distributions=param_distributions,
+    n_iter=10,
+    cv=5
+)
+```
+
+Here:
+
+```text
+estimator = RandomForestClassifier
+```
+
+So RandomizedSearchCV is tuning the **Random Forest model**.
+
+You could also use:
+
+```python
+estimator=LogisticRegression()
+```
+
+or:
+
+```python
+estimator=KNeighborsClassifier()
+```
+
+or:
+
+```python
+estimator=DecisionTreeClassifier()
+```
+
+### Simple meaning
+
+```text
+estimator = "Which model should I tune?"
+```
+
+---
+
+# 2. `n_jobs` — **how many CPU cores to use?**
+
+Example:
+
+```python
+n_jobs=-1
+```
+
+means:
+
+> **Use all available CPU cores to perform the search in parallel.**
+
+For example, suppose your computer has 8 CPU cores.
+
+```python
+n_jobs=-1
+```
+
+can use all available cores.
+
+If:
+
+```python
+n_jobs=2
+```
+
+it can use 2 CPU cores for the parallel jobs.
+
+If you don't specify it:
+
+```python
+n_jobs=None
+```
+
+generally means the computation runs using **one job at a time**.
+
+---
+
+## Why is `n_jobs` useful?
+
+Remember RandomizedSearchCV may perform many model fits.
+
+Suppose:
+
+```python
+n_iter = 20
+cv = 5
+```
+
+Approximately:
+
+```text
+20 × 5 = 100 model fits
+```
+
+Without parallel processing:
+
+```text
+Fit 1
+  ↓
+Fit 2
+  ↓
+Fit 3
+  ↓
+...
+Fit 100
+```
+
+With:
+
+```python
+n_jobs=-1
+```
+
+multiple independent fits can run at the same time, so the search can finish faster.
+
+---
+
+## Complete example
+
+```python
+random_search = RandomizedSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_distributions=param_distributions,
+    n_iter=10,
+    cv=5,
+    scoring='accuracy',
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+Here:
+
+| Parameter             | Meaning                               |
+| --------------------- | ------------------------------------- |
+| `estimator`           | Which model to tune                   |
+| `param_distributions` | Hyperparameters and possible values   |
+| `n_iter`              | Number of random combinations to try  |
+| `cv`                  | Number of cross-validation folds      |
+| `scoring`             | Metric used to compare models         |
+| `random_state`        | Makes random selection reproducible   |
+| `n_jobs`              | Number of parallel jobs/CPU resources |
+
+### Easy interview answer
+
+> **Estimator specifies the ML model that RandomizedSearchCV will tune, while `n_jobs` specifies how many jobs can run in parallel. `n_jobs=-1` uses all available CPU cores to speed up the search.**
