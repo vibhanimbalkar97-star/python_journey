@@ -68,3 +68,75 @@ sort by and order
 
 SORT_FIELDS = ["marks", "age", "name"]
 SORT_ORDER  = ["asc", "desc"]
+
+@app.get("/sort")
+def sort_data(sort_by : str = Query(None, description="Sort by marks, name, age",
+    examples=["marks"]),
+    order : str = Query("asc", description="asc or desc", examples=["asc", "desc"])):
+
+    #If the given sort_by input dosn't belongs to any (marks, age, name) we will raise an error.
+    if sort_by not in SORT_FIELDS:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Invalid sort_by {sort_by}, choose from {SORT_FIELDS}"
+        )
+    #If the given order input dosn't belongs to any (asc, desc) we will raise an error.
+    if order not in SORT_ORDER:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Invalid order '{order}. Choose from {SORT_ORDER}"
+        )
+    
+    data = load_data()
+
+    #step-1 Turn the dictionary into a list, putting the ID inside each student
+    student = []
+    for student_id, info in data.items():
+        info['id'] = student_id 
+        student.append(info)
+
+     #Step-2 Sort the list by the choosen field
+    reverse = (order == "desc")
+    sorted_students = sorted(student, key = lambda s:s[sort_by], reverse=reverse)
+    print(sorted_students)
+    return sorted_students
+
+"""
+PAGINATION
+http://127.0.0.1:8000/paginate?page=1&limit=2
+
+page -> which page you want
+limit -> how many students(records) on one page
+
+Formula:
+start = (page - 1) * limit
+end = start + limit
+page start from 1 not 0 = by default in query parameter 1.
+page always greater than 0 and non -ve value. 
+limit threshold means set the limit betn 2 t0 100
+
+"""
+@app.get("/paginate")
+def paginate_student(page : int = Query(1, ge=1, description="Which page you want (start from 1)"),
+                     limit: int = Query(2, ge=1, le=100, description="How many students on one page (1 to 100)")):
+
+    data = load_data()
+
+    student = []
+    for student_id, info in data.items():
+        info['id'] = student_id
+        student.append(info)
+
+        start = (page -1 ) * limit
+        end   = start + limit
+
+        page_student = student[start : end]
+
+        total_student = len(student)
+
+    return {
+        "page"         : page,
+        "limit"        : limit,
+        "page_student" : page_student,
+        "total_student": total_student
+    }
