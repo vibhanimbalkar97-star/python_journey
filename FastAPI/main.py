@@ -216,7 +216,7 @@ class StudentUpdate(BaseModel):
     name    : str      | None = Field(None, min_length=2, max_length=50 )
     age     : int      | None = Field(None, gt=0, lt=100 )
     course  : str      | None = Field(None, max_length=50 )
-    marks   : str      | None = Field(None, gt=0, le=100 )
+    marks   : int      | None = Field(None, gt=0, le=100 )
     email   :EmailStr  | None = None
 
 @app.put("/student/{student_id}")
@@ -232,10 +232,13 @@ def update_student(
             detail=f"The given id '{student_id}' is not found"
         )
 
+    #STEP1 : The student as it is right now.
     exisiting = data[student_id]  # data[S001]={name, all key value}
 
+   #STEP2 : ONLY the fields the client actually sent
     update = student_update.model_dump()
 
+    #STEP3: COPY the new value on the top of old one.
     for key, value in update.items():
         exisiting[key] = value
 
@@ -249,3 +252,22 @@ def update_student(
         "student": student 
     }
 
+"""
+DELETE 
+"""
+@app.delete("/delete/{student_id}")
+def delete_student(student_id : str = Path(..., description="Id of the student", examples=["S001"])):
+    data = load_data()
+
+    if student_id not in data:
+        raise HTTPException(
+            status_code=404,
+            detail=f"The student of given id '{id}' not found"
+        )
+
+    del data[student_id]
+    save_data(data)
+
+    return{
+        "message": "Student deleted successfully"
+    }
