@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Path, Query
+from pydantic import BaseModel, Field, EmailStr, field_validator, computed_field
 import json
 
 app = FastAPI()
@@ -17,6 +18,11 @@ def greet():
 def load_data():
     with open("./students.json", "r") as fs:
         return json.load(fs)
+
+#Helper Function 2.
+def save_data(data):
+    with open("./students.json", "w") as fs:
+        json.dump(data, fs, indent=4)
 
 @app.get('/students')
 def get_data():
@@ -140,3 +146,106 @@ def paginate_student(page : int = Query(1, ge=1, description="Which page you wan
         "page_student" : page_student,
         "total_student": total_student
     }
+
+
+"""
+REQUEST BODY
+
+POST -> data comes in the BODY (a JSON Object sent with the request)
+
+When a function argument is a Pydantic Model, FastAPI reads it from the body
+and validates automatically, Bad Data -> 422
+
+student = object, Student = pydantic model
+we cannot save data in object so convert it into dict using model.dump()
+"""
+class Student(BaseModel):
+    id    : str      = Field(..., examples=["S001"])
+    name  : str      = Field(..., min_length=2, max_length=50)
+    age   : int      = Field(..., gt=0, lt=100)
+    email : EmailStr 
+    course: str      = Field(..., max_length=50 )
+    marks : int      = Field(..., ge=0, le=100)
+
+    #Custom Rule : Name must contain only letters and spaces
+    @field_validator("name")
+    @classmethod
+    def check_name(cls, value):
+        if not value.replace(" ", "").isalpha():
+            raise ValueError("Name must contain only letters and space")
+
+        return value.title() 
+
+    @computed_field
+    @property
+    def grade(self)->str:
+        if self.marks >= 90:
+            return "A+"
+        elif self.marks >= 80:
+            return "A"
+        elif self.marks >= 70:
+            return "B"
+        elif self.marks >= 60:
+            return "C"
+        else:
+            return "F"
+        
+@app.post("/create", status_code=201)
+def create_student(student: Student):
+    data = load_data()
+
+    if student.id in data:
+        raise HTTPException(
+            detail=f"Student with given id '{student.id}' already exists",
+            status_code=400
+        )
+    
+    data[student.id] = student.model_dump(exclude={"id", "grade"})
+    save_data(data)
+
+    return {
+        "message": "Student created successfully  ",
+        "Student": student
+    }
+
+"""
+PUT    = update
+route  = /student/{student_id}
+"""
+class StudentUpdate(BaseModel):
+    name    : str      | None = Field(None, min_length=2, max_length=50 )
+    age     : int      | None = Field(None, gt=0, lt=100 )
+    course  : str      | None = Field(None, max_length=50 )
+    marks   : str      | None = Field(None, gt=0, le=100 )
+    email   :EmailStr  | None = None
+
+@app.put("/student/{student_id}")
+def update_student(
+    student_update : StudentUpdate,
+    student_id     : str = Path(..., description="The Id of the student", examples=["S001"])
+):
+    data = load_data()
+
+    if student_id not in data:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The given id '{student_id}' is not found"
+        )
+
+    exisiting = data[student_id]  # data[S001]={name, all key value}
+
+    update = student_update.model_dump()
+
+    for key, value in update.items():
+        exisiting[key] = value
+
+    student = Student(id=student_id, **exisiting)
+
+    data[student_id] = student.model_dump(exclude={"id", "grade"})
+    save_data(data)
+
+    return {
+        "message":"Student updated successfully",
+        "student": student 
+    }
+

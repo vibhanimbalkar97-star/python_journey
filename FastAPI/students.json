@@ -33,5 +33,21 @@
         "email": "kabir.singh@example.com",
         "course": "Data Science",
         "marks": 54
+    },
+    "S006": {
+        "name": "Abc",
+        "age": 45,
+        "email": "user@example.com",
+        "course": "python",
+        "marks": 100,
+        "check_grade": "A+"
+    },
+    "S007": {
+        "name": "Abc",
+        "age": 45,
+        "email": "user@example.com",
+        "course": "python",
+        "marks": 100,
+        "check_grade": "A+"
     }
 }
