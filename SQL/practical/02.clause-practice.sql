@@ -75,4 +75,22 @@ select distinct upper(category) as category_upper
 from products 
 order by category desc;
 
+select name,
+case
+    when is_available then 'in_stock'
+	else 'out_stock'
+end as avability_status
+from products;
+
+select name, stock_quantity,
+case 
+     when stock_quantity > 100 then 'high stock'
+	 when stock_quantity between 30 AND 100 then 'medium stock'
+	 else 'low stock'
+end as label
+from products;
+
+
+select * from products;
+
 select * from products;
