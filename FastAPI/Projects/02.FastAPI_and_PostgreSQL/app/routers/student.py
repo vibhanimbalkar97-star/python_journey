@@ -1,9 +1,12 @@
-from fastapi import Path, Depends, HTTPException, APIRouter
+from fastapi import Path, Depends, HTTPException, APIRouter, Query
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
 from app.models.student import StudentDB
 from app.schemas.student import StudentResponse, StudentCreate, StudentUpdate
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
+
+
 
 
 router = APIRouter()
@@ -88,4 +91,57 @@ def delete_student(student_id : str = Path(..., description="The Id of the stude
     db.commit()
 
     return {"message": f"Student '{student_id}' deleted successfully"}
-  
+
+# Part 13: GET all students (filter + sort + paginate)
+
+SORT_FIELDS = ["marks", "age", "name"]
+SORT_ORDER  = ["asc", "desc"]
+
+@router.get('/students')
+def get_all(
+    course : str  | None = Query(None, description="show only students in this course", examples=["Python"]),
+    sort_by: str  | None = Query(None, description="Sort by marks, name, age"),
+    order  : str         = Query("asc", description="asc or desc", examples=["desc"]),
+    page   : int         = Query(1, ge=1, description="Which page you want (starts from 1)"),
+    limit  : int         = Query(2, gt=1, le=100, description="How many students you want one page (1 to 100)"),
+    db: Session = Depends(get_db)
+):
+    if sort_by is not None and sort_by not in SORT_FIELDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid sort_by '{sort_by}', Choose from {SORT_FIELDS}"
+        )
+
+    if order not in SORT_ORDER:
+        raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid order '{order}', Choose from {SORT_ORDER}"
+        )
+
+    query = db.query(StudentDB) #SELECT * FROM student_records
+
+    if course:                  #WHERE -> SELECT * FROM student_records WHERE course == "Python";
+        query = query.filter(func.lower(StudentDB.course) == course)
+
+    total_students = query.count()
+
+    if sort_by:
+        column = getattr(StudentDB, sort_by) #"marks" -> StudentDB.marks
+
+        if order == "desc":
+            query = query.order_by(column.desc())
+        else:
+            query = query.order_by(column.asc())
+
+    else:
+        query = query.order_by(StudentDB.id)
+
+    start = (page - 1) * limit
+    students   = query.offset(start).limit(limit).all() # end
+
+    return {
+        "page": page,
+        "limit":limit,
+        "total_students": total_students,
+        "students": students
+    }
