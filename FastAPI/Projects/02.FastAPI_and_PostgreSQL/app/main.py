@@ -10,5 +10,5 @@ app = FastAPI()
 # Part 4: Create database tables
 Base.metadata.create_all(bind=engine)
 
-# Register student routes
+# Part 9: Register student routes
 app.include_router(student.router)
