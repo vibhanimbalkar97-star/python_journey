@@ -12,8 +12,9 @@ from sqlalchemy import func
 router = APIRouter()
 # Part 9: GET one student
 #Depends(get_db) means: "Before running this endpoint, run the get_db() function and give me what it returns."
+# tags = group the same routes means get all routes in Get.
 
-@router.get('/students/{student_id}', response_model=StudentResponse)
+@router.get('/students/{student_id}', response_model=StudentResponse, tags=["GET ROUTES"])
 def get_student(
     student_id : str = Path(..., description=f"The Id of the student", examples=["S001"]),
     db : Session = Depends(get_db)
@@ -28,7 +29,7 @@ def get_student(
     return student
 
 # Part 10: POST - create a student
-@router.post('/CreateStudent', response_model=StudentResponse, status_code=201)
+@router.post('/CreateStudent', response_model=StudentResponse, status_code=201, tags=["POST ROUTES"])
 def create_student(student : StudentCreate, db : Session = Depends(get_db)):
     if db.get(StudentDB, student.id):
         raise HTTPException(
@@ -41,6 +42,7 @@ def create_student(student : StudentCreate, db : Session = Depends(get_db)):
     try:
         db.commit()
     except IntegrityError:
+        db.rollback()   #Cancels everything the session did since the last commit()
         raise HTTPException(
             status_code=400,
             detail=f"Email '{student.email}' is already used by another student"
@@ -49,7 +51,7 @@ def create_student(student : StudentCreate, db : Session = Depends(get_db)):
     return new_student
 
 # Part 11: PUT - update a student
-@router.put('/UpdateStudent/{student_id}')
+@router.put('/UpdateStudent/{student_id}', tags=["PUT ROUTES"])
 def update_student(student_update : StudentUpdate, 
                    student_id : str = Path(..., description="The Id of the student", examples=["S001"]),
                     db : Session = Depends(get_db)):
@@ -71,13 +73,14 @@ def update_student(student_update : StudentUpdate,
         db.commit()
         
     except IntegrityError:
+        db.rollback()   #Cancels everything the session did since the last commit()
         raise HTTPException(status_code=400, detail=f"Email '{student.email}' is already used by another student")
 
     db.refresh(student)
     return student
 
 # Part 12: DELETE - remove a student
-@router.delete('/DeleteStudent/{student_id}')
+@router.delete('/DeleteStudent/{student_id}', tags=["DELETE ROUTES"])
 def delete_student(student_id : str = Path(..., description="The Id of the student", examples=["S001"]),
                        db: Session = Depends(get_db)):
     student = db.get(StudentDB, student_id)
@@ -97,7 +100,7 @@ def delete_student(student_id : str = Path(..., description="The Id of the stude
 SORT_FIELDS = ["marks", "age", "name"]
 SORT_ORDER  = ["asc", "desc"]
 
-@router.get('/students')
+@router.get('/students', tags=["GET ROUTES"])
 def get_all(
     course : str  | None = Query(None, description="show only students in this course", examples=["Python"]),
     sort_by: str  | None = Query(None, description="Sort by marks, name, age"),

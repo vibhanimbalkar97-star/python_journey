@@ -18,7 +18,6 @@ def check_name(cls, value):
     return value.title()
 
 class StudentUpdate(BaseModel):
-    id     : str | None  = Field(None, examples=["S001"])
     name   : str | None  = Field(None, min_length=2, max_length=50)
     age    : int | None  = Field(None, gt=0 , le=100 )
     course : str | None  = Field(None, max_length=50)

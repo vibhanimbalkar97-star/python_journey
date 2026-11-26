@@ -7,7 +7,7 @@ from app.core.config import DATABASE_URL
 engine = create_engine(DATABASE_URL)
 with engine.connect() as conn:
     version = conn.execute(text("SELECT version()")).scalar()
-    print(f"Connect to the {version.split(",")[0]}")
+    # print(f"Connect to the {version.split(",")[0]}")
     
 
 # Part 3: Create SessionLocal and Base
